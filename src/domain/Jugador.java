@@ -1,6 +1,7 @@
 package domain;
 
 public class Jugador {
+    //esto creo que debería ser directamente el cliente: que reciba las cartas como objetos desde el servidor
     private String nombre;
     private Carta carta1;
     private Carta carta2;

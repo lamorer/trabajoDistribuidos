@@ -24,10 +24,10 @@ public class Mesa {
         jugadores.add(jugador);
     }
 
-    public void repartirCartasIniciales(Cartas cartas) {
+    public void repartirCartasIniciales(Baraja baraja) {
         for (Jugador jugador : jugadores) {
-            Carta carta1 = cartas.repartirCarta();
-            Carta carta2 = cartas.repartirCarta();
+            Carta carta1 = baraja.repartirCarta();
+            Carta carta2 = baraja.repartirCarta();
             jugador.recibirCartas(carta1, carta2);
         }
     }

@@ -1,47 +1,38 @@
-package services;
+package tests;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import domain.Carta;
-import domain.Jugador;
-import domain.Mano;
-import domain.ManoPoker;
-import domain.Mesa;
-import domain.Palo;
+import domain.*;
 
-public class ReglasPoker {
-    public static List<Jugador> determinarGanador(Mesa mesa) {
-        // Evaluar las manos de los jugadores y determinar al ganador
-        List<ManoPoker> manos = new ArrayList<>();
-        List<Jugador> jugadores=mesa.getJugadores();
-        ExecutorService pool = Executors.newFixedThreadPool(mesa.getJugadores().size());
-
-        //CONTINUAR: Hacer que cada hilo evalúe todas las posibles manos del jugador y determine cual es la mejor
-        for(Jugador j: jugadores){
-            pool.execute(new Runnable(){
-                public void run(){
-                    manos.add(evaluarMano(j, mesa.getCartasEnMesa()));
-                }
-            });           
+public class Pruebas {
+    public static void main(String [] args){
+        Baraja baraja=new Baraja();
+        baraja.barajar();
+        List<Carta> cartas=new ArrayList<>();
+        Jugador j=new Jugador("Pepe");
+        j.recibirCartas(baraja.repartirCarta(), baraja.repartirCarta());
+        j.mostrarCartas();
+        for(int i=0;i<5;i++){
+            cartas.add(baraja.repartirCarta());
         }
-
-        List<Jugador> jugadoresGanadores = new ArrayList<>();
-        jugadoresGanadores.add(jugadores.get(0));
-        ManoPoker manoGanadora = manos.get(0);
-        for(int i=1;i<manos.size();i++){
-            Jugador j=jugadores.get(i);
-            ManoPoker m=manos.get(i);
-            if(manoGanadora.getValor()<m.getValor()){
-                manoGanadora=m;
-                jugadoresGanadores.clear();
-                jugadoresGanadores.add(j);
-            } else if(manoGanadora.getValor()==m.getValor()){
-                jugadoresGanadores.add(j);
-            }
+        ManoPoker m=evaluarMano(j,cartas);
+        for(Carta c: cartas){
+            System.out.println(c.toString());
         }
-        return jugadoresGanadores;
+        System.out.println(m.toString() );
     }
+
+
+
 
     private static ManoPoker evaluarMano(Jugador jugador, List<Carta> cartasEnMesa) {
         //la lista de cartas contiene la lista de 5 cartas de la mano ordenadas según la jugada (las cartas que acompaña se ordenan por orden desciendente)
@@ -75,8 +66,6 @@ public class ReglasPoker {
         for(ManoPoker m : manos){
             if(m.getValor()>mejorMano.getValor()){
                 mejorMano=m;
-            } else if(m.getValor()==mejorMano.getValor()){
-
             }
         }
 
@@ -90,25 +79,22 @@ public class ReglasPoker {
             return new ManoPoker(Mano.escaleraReal, combinacion);
         } else if(esEscaleraColor(combinacion)){
             return new ManoPoker(Mano.escaleraColor, combinacion);
-        } else { 
-            ManoPoker mano=esPoker(combinacion);
-            if(mano!=null){
-                return mano;
-            } else if(esFull(combinacion)){
-                return new ManoPoker(Mano.full, combinacion);
-            } else if(esColor(combinacion)){
-                return new ManoPoker(Mano.color, combinacion);
-            } else if(esEscalera(combinacion)){
-                return new ManoPoker(Mano.escalera, combinacion);
-            } else if(esTrio(combinacion)){
-                return new ManoPoker(Mano.trio, combinacion);
-            } else if(esDoblePareja(combinacion)){
-                return new ManoPoker(Mano.doblePareja, combinacion);
-            } else if(esPareja(combinacion)){
-                return new ManoPoker(Mano.pareja, combinacion);
-            } else{
-                return new ManoPoker(Mano.cartaAlta,combinacion);
-            }
+        } else if(esPoker(combinacion)){
+            return new ManoPoker(Mano.poker, combinacion);
+        } else if(esFull(combinacion)){
+            return new ManoPoker(Mano.full, combinacion);
+        } else if(esColor(combinacion)){
+            return new ManoPoker(Mano.color, combinacion);
+        } else if(esEscalera(combinacion)){
+            return new ManoPoker(Mano.escalera, combinacion);
+        } else if(esTrio(combinacion)){
+            return new ManoPoker(Mano.trio, combinacion);
+        } else if(esDoblePareja(combinacion)){
+            return new ManoPoker(Mano.doblePareja, combinacion);
+        } else if(esPareja(combinacion)){
+            return new ManoPoker(Mano.pareja, combinacion);
+        } else{
+            return new ManoPoker(Mano.cartaAlta,combinacion);
         }
     }
 
@@ -153,7 +139,19 @@ public class ReglasPoker {
         return true;
     }
     
-    private static ManoPoker esPoker(List<Carta> combinacion) {
+    private static boolean esPoker(List<Carta> combinacion) {
+        // Verificar si hay cuatro cartas con el mismo valor
+        if (combinacion.size() != 5) {
+            return false;
+        }
+    
+        Collections.sort(combinacion, new Comparator<Carta>() {
+            @Override
+            public int compare(Carta carta1, Carta carta2) {
+                return carta1.getNumero() - carta2.getNumero();
+            }
+        });
+    
         // Contar las cartas con el mismo valor
         int contador = 1;
         int valorAnterior = combinacion.get(0).getNumero();
@@ -163,16 +161,7 @@ public class ReglasPoker {
             if (valorActual == valorAnterior) {
                 contador++;
                 if (contador == 4) {
-                    List<Carta> list=new ArrayList<>();
-                    for(int j=1;j<=4;j++){
-                        list.add(combinacion.get(i));
-                    }
-                    if(!combinacion.get(0).equals(combinacion.get(i))){
-                        list.add(combinacion.get(0));
-                    } else {
-                        list.add(combinacion.get(4));
-                    }
-                    return new ManoPoker(Mano.poker,list); // Hay un poker
+                    return true; // Hay un poker
                 }
             } else {
                 contador = 1;
@@ -180,7 +169,7 @@ public class ReglasPoker {
             }
         }
     
-        return null;
+        return false;
     }
 
     private static boolean esFull(List<Carta> combinacion) {
@@ -279,7 +268,7 @@ public class ReglasPoker {
         return false;
     }
 
-
+    
     private static List<Carta> ordenarCartas(List<Carta> combinacion){
         Collections.sort(combinacion, new Comparator<Carta>() {
             @Override
@@ -309,5 +298,4 @@ public class ReglasPoker {
             combinacionActual.remove(combinacionActual.size() - 1);
         }
     }
-    
 }

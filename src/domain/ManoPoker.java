@@ -41,5 +41,9 @@ public class ManoPoker {
     public List<Carta> getCartas() {
         return cartas;
     }
+
+    public String toString(){
+        return this.descripcion.name();
+    }
 }
 

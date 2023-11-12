@@ -2,12 +2,12 @@ package domain;
 
 import java.util.Random;
 
-public class Cartas {
-    private static final int NUM_CARTAS = 52;
+public class Baraja {
+     private static final int NUM_CARTAS = 52;
     private Carta[] baraja = new Carta[NUM_CARTAS];
     private int size;
 
-    public Cartas() {
+    public Baraja() {
         this.size = NUM_CARTAS;
         Palo[] palos = Palo.values();
         int index = 0;
@@ -42,5 +42,11 @@ public class Cartas {
 
     public int getSize() {
         return size;
+    }
+
+    public void showBaraja(){
+        for(int i=0; i<baraja.length;i++){
+            System.out.println(baraja[i].toString());
+        }
     }
 }

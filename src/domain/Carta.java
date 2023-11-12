@@ -1,13 +1,16 @@
 package domain;
 
-public class Carta {
+import java.io.Serializable;
+
+public class Carta implements Serializable{
+    private static final long serialVersionUID = 111L;
     private int numero;
     private Palo palo;
 
     public Carta(int n, Palo s) {
         //PRE: 1<=n<=10
         //POST: Crea una instancia de tipo carta con los valores indicados, si el número no es correcto se crea el AS.
-        if (n <= 10 && n >= 1) {
+        if (n <= 13 && n >= 1) {
             this.numero = n;
         } else {
             System.out.println("Número incorrecto. Creamos el AS");
@@ -17,7 +20,7 @@ public class Carta {
 
     }
 
-    public int getnumero() {
+    public int getNumero() {
         //PRE: --
         //POST: It returns an integer that is the numeric value of the Carta.
         return this.numero;
@@ -29,13 +32,13 @@ public class Carta {
         return this.palo;
     }
 
-    public void setnumero(int n) {
+    public void setNumero(int n) {
         //PRE: 1<=n<=12
         //POST: It sets n as the Carta numero.
         this.numero = n;
     }
 
-    public void setpalo(Palo s) {
+    public void setPalo(Palo s) {
         //PRE: --
         //POST: It sets s as the palo of the Carta.
         this.palo = s;
@@ -49,37 +52,31 @@ public class Carta {
 
     public String toString() {
         //PRE: --
-        //POST: It returns a string with the Carta information. numero 8 as Jack, 9 as Knight and 10 as King.
+        //POST: It returns a string with the Carta information. numero 11 as J, 12 as Q and 13 as K.
         String s = "";
-        if (this.numero <= 7 && this.numero != 1) {
+        if (this.numero <= 10 && this.numero != 1) {
             s = s + this.numero;
-        }
-        switch (this.numero) {
-            case 1:
-                s = "A";
-                break;
-            case 8:
-                s = s + "10";
-                break;
-            case 9:
-                s = s + "11";
-                break;
-            case 10:
-                s = s + "12";
-                break;
+        } else if (this.numero==1){
+            s = "A";
+        } else if(this.numero==11){
+            s="J";
+        } else if(this.numero==12){
+            s="Q";
+        } else if(this.numero==13){
+            s="K";
         }
         switch (this.palo) {
             case Trebol:
-                s = s + "♣";
+                s = s + "T";
                 break;
             case Diamante:
-                s = s + "♦";
+                s = s + "D";
                 break;
             case Corazon:
-                s = s + "♥";
+                s = s + "C";
                 break;
             case Pica:
-                s = s + "♠";
+                s = s + "P";
                 break;
 
         }
