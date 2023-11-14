@@ -1,24 +1,33 @@
 package domain;
 
 public class Jugador {
-    //esto creo que debería ser directamente el cliente: que reciba las cartas como objetos desde el servidor
     private String nombre;
     private Carta carta1;
     private Carta carta2;
+    private int fichas;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
         this.carta1 = null;
         this.carta2 = null;
+        this.fichas = 1500;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public Carta[] getCartas(){
-        Carta[] mano = new Carta[]{carta1,carta2};
+    public Carta[] getCartas() {
+        Carta[] mano = new Carta[] { carta1, carta2 };
         return mano;
+    }
+
+    public int getFichas() {
+        return fichas;
+    }
+
+    public void setFichas(int fichas) {
+        this.fichas = fichas;
     }
 
     public void recibirCartas(Carta carta1, Carta carta2) {

@@ -2,7 +2,6 @@ package domain;
 
 import java.util.*;
 
-
 public class ManoPoker {
     private int valor;
     private Mano descripcion;
@@ -42,8 +41,11 @@ public class ManoPoker {
         return cartas;
     }
 
-    public String toString(){
-        return this.descripcion.name();
+    public String toString() {
+        String s=this.descripcion.name();
+        for(Carta c: this.cartas){
+            s+=" "+c.toString();
+        }
+        return s;
     }
 }
-

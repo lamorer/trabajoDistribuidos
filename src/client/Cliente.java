@@ -3,8 +3,7 @@ package client;
 import java.net.Socket;
 import java.util.Scanner;
 
-import domain.Carta;
-import domain.Jugador;
+import domain.*;
 
 import java.io.*;
 
@@ -15,13 +14,13 @@ public class Cliente {
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-             Scanner scanner=new Scanner(System.in);) {
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                Scanner scanner = new Scanner(System.in);) {
             System.out.println("Introduce el nombre del jugador:");
             String nomJugador = scanner.nextLine();
-            jugador=new Jugador(nomJugador);
-                        
+            jugador = new Jugador(nomJugador);
+
             Carta c1 = (Carta) in.readObject();
             System.out.println(c1.toString());
             Carta c2 = (Carta) in.readObject();
@@ -29,7 +28,7 @@ public class Cliente {
 
             jugador.recibirCartas(c1, c2);
             jugador.mostrarCartas();
-            
+
             // Envía confirmación al servidor
             out.writeBytes("Cartas recibidas!");
             out.flush();

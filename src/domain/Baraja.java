@@ -3,7 +3,7 @@ package domain;
 import java.util.Random;
 
 public class Baraja {
-     private static final int NUM_CARTAS = 52;
+    private static final int NUM_CARTAS = 52;
     private Carta[] baraja = new Carta[NUM_CARTAS];
     private int size;
 
@@ -13,7 +13,7 @@ public class Baraja {
         int index = 0;
 
         for (Palo palo : palos) {
-            for (int numero = 1; numero <= 13; numero++) {
+            for (int numero = 2; numero <= 14; numero++) {
                 baraja[index] = new Carta(numero, palo);
                 index++;
             }
@@ -44,8 +44,8 @@ public class Baraja {
         return size;
     }
 
-    public void showBaraja(){
-        for(int i=0; i<baraja.length;i++){
+    public void showBaraja() {
+        for (int i = 0; i < baraja.length; i++) {
             System.out.println(baraja[i].toString());
         }
     }
