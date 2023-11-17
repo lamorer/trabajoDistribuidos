@@ -26,7 +26,7 @@ public class Mesa {
     }
 
     public void agregarJugador(Jugador jugador) {
-        jugadores.put(jugadores.size(),jugador);
+        jugadores.put(jugadores.size()+1,jugador);
     }
 
     //Baraja debe estar barajada.
@@ -54,6 +54,15 @@ public class Mesa {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public void establecerOrdenInicial (){
+        List<Jugador> j = getJugadores();
+        Collections.shuffle(j);
+        jugadores.clear();
+        for(int i=0;i<j.size();i++){
+            jugadores.put(i+1,j.get(i));
         }
     }
 }

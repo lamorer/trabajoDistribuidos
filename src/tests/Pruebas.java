@@ -397,6 +397,7 @@ public class Pruebas {
             list.add(cuartoCarta);
             list.add(quintaCarta);
             list.add(primeraCarta);
+            return new ManoPoker(Mano.doblePareja, list);
         }
         return null;
     }
