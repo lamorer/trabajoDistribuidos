@@ -3,7 +3,7 @@ package domain;
 import java.util.*;
 
 public class Mesa {
-    private HashMap<Integer,Jugador> jugadores;
+    private HashMap<Jugador,Integer> jugadores;
     private List<Carta> cartasEnMesa;
     private int fichasMesa;
 
@@ -22,16 +22,16 @@ public class Mesa {
     }
 
     public List<Jugador> getJugadores() {
-        return new ArrayList<>(jugadores.values());
+        return new ArrayList<>(jugadores.keySet());
     }
 
     public void agregarJugador(Jugador jugador) {
-        jugadores.put(jugadores.size()+1,jugador);
+        jugadores.put(jugador,jugadores.size()+1);
     }
 
     //Baraja debe estar barajada.
     public void repartirCartasIniciales(Baraja baraja) {
-        for (Jugador jugador : jugadores.values()) {
+        for (Jugador jugador : jugadores.keySet()) {
             Carta carta1 = baraja.repartirCarta();
             Carta carta2 = baraja.repartirCarta();
             jugador.recibirCartas(carta1, carta2);
@@ -49,7 +49,7 @@ public class Mesa {
     public boolean apostar(int cant, Jugador jugador){
         int fichasJugador = jugador.getFichas();
         if(fichasJugador>=cant){
-            jugador.setFichas(fichasJugador);
+            jugador.setFichas(fichasJugador-cant);
             fichasMesa+=cant;
             return true;
         } else {
@@ -62,7 +62,22 @@ public class Mesa {
         Collections.shuffle(j);
         jugadores.clear();
         for(int i=0;i<j.size();i++){
-            jugadores.put(i+1,j.get(i));
+            jugadores.put(j.get(i),i+1);
         }
+    }
+
+    public String informacionMesa(){
+        String s = "Bote: "+this.fichasMesa+"\n";
+        for(Carta c: cartasEnMesa){
+            s+=c.toString()+"\n";
+        }
+        for(Jugador j: jugadores.keySet()){
+            s+=j.getNombre()+": "+j.getFichas()+"\n";
+        }
+        return s;
+    }
+
+    public void setOrdenJugador(Jugador j, int i){
+        jugadores.put(j,i);
     }
 }
