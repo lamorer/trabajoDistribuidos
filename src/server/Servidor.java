@@ -29,12 +29,13 @@ public class Servidor {
             while (true) {
                 try {
                     Socket cliente = servidor.accept();
+                    //Añadir tantos accept como clientes quiera tener por partidas
                     ObjectOutputStream out = new ObjectOutputStream(cliente.getOutputStream());
                     ObjectInputStream in = new ObjectInputStream(cliente.getInputStream());
 
                     pool.execute(new Runnable() {
                         public void run() {
-                            atenderPeticion(in, out);
+                            atenderPeticion(in, out);    //Cada hilo es una partida abierta
                         }
                     });
                 } catch (IOException e) {
