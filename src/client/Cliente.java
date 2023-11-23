@@ -4,7 +4,6 @@ import java.net.Socket;
 import java.util.Scanner;
 import domain.*;
 import java.io.*;
-import java.util.Arrays;
 import java.util.List;
 
 public class Cliente {
@@ -37,27 +36,40 @@ public class Cliente {
 
                     out.writeBytes("Cartas recibidas!\n");
                     out.flush();
-                    
-                    //Recibo la información de la mesa
-                    String linea;
-                    while(!(linea=in.readLine()).equals(".")){
-                        System.out.println(linea);
+                    int opcion;
+                    for(int i=0;i<4;i++){
+                        //Recibo la información de la mesa
+                        String linea;
+                        while(!(linea=in.readLine()).equals(".")){
+                            System.out.println(linea);
+                        }
+                        //Recibo el menú de elección
+                        
+                        while(!(linea=in.readLine()).equals(".")){
+                            System.out.println(linea);
+                        }
+                        
+                        opcion = scanner.nextInt();
+                        scanner.nextLine();
+                        out.writeInt(opcion);
+                        out.flush();
+
+                        if(opcion == 3){
+                            boolean cantCorrecta = false;
+                            System.out.println("opción de subir");
+                            while(!cantCorrecta){
+                                System.out.println(in.readLine());
+                                int cant = scanner.nextInt();
+                                scanner.nextLine();
+                                out.writeInt(cant);
+                                out.flush();
+                                cantCorrecta = in.readBoolean();
+                                if(!cantCorrecta){
+                                    System.out.println(in.readLine());
+                                }
+                            }
+                        }
                     }
-                    //Recibo el menú de elección
-                    
-                    while(!(linea=in.readLine()).equals(".")){
-                        System.out.println(linea);
-                    }
-                    
-                    int opcion = scanner.nextInt();
-                    scanner.nextLine();
-                    out.writeInt(opcion);
-                    out.flush();
-                    while(!(linea=in.readLine()).equals(".")){
-                        System.out.println(linea);
-                    }
-                } else {
-                    System.out.println("Ya no puedes unirte a la mesa, la partida ya ha comenzado!");
                 }
 
             } catch (IOException | ClassNotFoundException e) {

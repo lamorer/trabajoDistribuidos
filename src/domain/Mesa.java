@@ -6,11 +6,13 @@ public class Mesa {
     private HashMap<Jugador,Integer> jugadores;
     private List<Carta> cartasEnMesa;
     private int fichasMesa;
+    private int apuesta;
 
     public Mesa() {
         jugadores = new HashMap<>();
         cartasEnMesa = new ArrayList<>();
         fichasMesa = 0;
+        apuesta = 30;
     }
 
     public int getFichas (){
@@ -25,8 +27,16 @@ public class Mesa {
         return new ArrayList<>(jugadores.keySet());
     }
 
+    public int getApuesta(){
+        return apuesta;
+    }
+
     public void agregarJugador(Jugador jugador) {
         jugadores.put(jugador,jugadores.size()+1);
+    }
+
+    public void setApuesta(int apuesta){
+        this.apuesta=apuesta;
     }
 
     //Baraja debe estar barajada.
@@ -79,5 +89,9 @@ public class Mesa {
 
     public void setOrdenJugador(Jugador j, int i){
         jugadores.put(j,i);
+    }
+
+    public HashMap<Jugador, Integer> getJugadoresOrden (){
+        return jugadores;
     }
 }
