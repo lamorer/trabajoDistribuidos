@@ -56,7 +56,6 @@ public class Cliente {
 
                         if(opcion == 3){
                             boolean cantCorrecta = false;
-                            System.out.println("opción de subir");
                             while(!cantCorrecta){
                                 System.out.println(in.readLine());
                                 int cant = scanner.nextInt();
@@ -68,7 +67,7 @@ public class Cliente {
                                     System.out.println(in.readLine());
                                 }
                             }
-                        }
+                        }   //RECIBIR INFORMACIÓN DE GANADOR
                     }
                 }
 
