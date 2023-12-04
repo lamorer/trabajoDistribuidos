@@ -9,16 +9,22 @@ public class Mesa {
     private int apuesta;
     private static int ciegaGrande = 30;
     private static int ciegaPequena = 15;
+    private int ronda;
 
     public Mesa() {
         jugadores = new HashMap<>();
         cartasEnMesa = new ArrayList<>();
         fichasMesa = 0;
         apuesta = ciegaGrande;
+        ronda = 1;
     }
 
     public int getFichas() {
         return fichasMesa;
+    }
+
+    public int getRonda(){
+        return ronda;
     }
 
     public void setFichas(int fichas) {
@@ -35,6 +41,10 @@ public class Mesa {
 
     public int getApuesta() {
         return apuesta;
+    }
+
+    public void siguienteRonda(){
+        ronda++;
     }
 
     public int getCiegaGrande() {

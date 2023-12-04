@@ -48,16 +48,19 @@ public class Servidor {
         iniciarPartida(mesa);
         ponerCiegas(mesa);
         repartirCartas(jugadores, mesa, baraja);
+        mesa.setApuesta(mesa.getCiegaGrande());
         ganador= hablarPrimeraRonda(jugadores, mesa);
         if(ganador==null){
             for (int i = 0; i < 3; i++) { // FLOP
                 mesa.agregarCartaAMesa(baraja.repartirCarta());
             }
             ganador= hablar(jugadores, mesa);
+            mesa.setApuesta(mesa.getCiegaGrande());
             if(ganador==null){
                 mesa.agregarCartaAMesa(baraja.repartirCarta()); // TURN
                 System.out.println(mesa.informacionMesa());
                 ganador= hablar(jugadores, mesa);
+                mesa.setApuesta(mesa.getCiegaGrande());
                 if(ganador==null){
                     mesa.agregarCartaAMesa(baraja.repartirCarta()); // RIVER
                     System.out.println(mesa.informacionMesa());
@@ -104,8 +107,8 @@ public class Servidor {
 
     public static void ponerCiegas(Mesa mesa) {
         List<Jugador> jugadores = mesa.getJugadores();
-        mesa.apostar(10, jugadores.get(0));
-        mesa.apostar(20, jugadores.get(1));
+        mesa.apostar(mesa.getCiegaPequena(), jugadores.get(0));
+        mesa.apostar(mesa.getCiegaGrande(), jugadores.get(1));
         if (mesa.getFichas() != 0) {
             System.out.println(mesa.getFichas());
         }
@@ -142,7 +145,7 @@ public class Servidor {
             int indiceJugador = (indicePrimerJugador + i) % jugadores.size();
             Jugador j = jugadores.get(indiceJugador);
             JugadorInfo s = clientes.get(j.getNombre());
-            accionJugador(s, mesa, j);
+            accionJugador(s, mesa, j, mesa.getRonda());
             ganador = comprobar(mesa);
             if (ganador != null) {
                 System.out.print("Ganador: ");
@@ -150,6 +153,7 @@ public class Servidor {
                 return ganador;
             }
         }
+        mesa.siguienteRonda();
         return null;
     }
 
@@ -159,7 +163,7 @@ public class Servidor {
         Jugador ganador;
         for (Jugador j : jugadores) {
             s = clientes.get(j.getNombre());
-            accionJugador(s, mesa, j);
+            accionJugador(s, mesa, j, mesa.getRonda());
             ganador = comprobar(mesa);
             if (ganador != null) {
                 System.out.print("Ganador: ");
@@ -167,18 +171,23 @@ public class Servidor {
                 return ganador;
             }
         }
+        mesa.siguienteRonda();
         return null;
     }
 
-    public static void accionJugador(JugadorInfo s, Mesa mesa, Jugador j) {
+    public static void accionJugador(JugadorInfo s, Mesa mesa, Jugador j, int ronda) {
         try {
             ObjectOutputStream out = s.getOutputStream();
             ObjectInputStream in = s.getInputStream();
             enviarInformacionMesa(in, out, mesa);
             if (mesa.getJugadoresOrden().get(j) != 0) { // Si es 0, el jugador ya no está en la mano
+                String igualarPasar="Igualar";
+                if((mesa.getRonda()==1 && mesa.getJugadoresOrden().get(j)==2 && mesa.getApuesta()==mesa.getCiegaGrande()) || (mesa.getRonda()!=1 && mesa.getApuesta()==mesa.getCiegaGrande())){
+                    igualarPasar="Pasar";
+                }
                 String mensaje = "Turno de " + j.getNombre() + ". Elige una opción:\n" +
                         "1. No ir\n" +
-                        "2. Igualar\n" +
+                        "2. "+ igualarPasar +"\n" +
                         "3. Subir\n" +
                         "Ingresa el número correspondiente a tu elección:\n" + ".\n";
 
@@ -194,8 +203,8 @@ public class Servidor {
                             System.out.println("Elección de " + j.getNombre() + ": No ir");
                             break;
                         case 2:
-                            igualar(j, mesa);
-                            System.out.println("Elección de " + j.getNombre() + ": Igualar");   //MIRAR PASAR/IGUALAR
+                            igualarPasar(j, mesa, igualarPasar);
+                            System.out.println("Elección de " + j.getNombre() + ": "+igualarPasar);   //MIRAR PASAR/IGUALAR
                             break;
                         case 3:
                             System.out.println("Elección de " + j.getNombre() + ": Subir");
@@ -301,8 +310,15 @@ public class Servidor {
         mesa.setOrdenJugador(j, 0);
     }
 
-    public static void igualar(Jugador j, Mesa mesa) {
-        mesa.apostar(mesa.getApuesta(), j);
+    public static void igualarPasar(Jugador j, Mesa mesa, String igualarPasar) {
+        if(igualarPasar.equals("Igualar")){
+            if(mesa.getJugadoresOrden().get(j)==1){
+                 mesa.apostar(mesa.getApuesta()-mesa.getCiegaPequena(), j);
+                 System.out.println("Ha apostado "+(mesa.getApuesta()-mesa.getCiegaPequena()));
+            } else {
+                 mesa.apostar(mesa.getApuesta(), j);
+            }
+        }
     }
 
     public static void subir(Jugador j, Mesa mesa, int cant) {
