@@ -10,6 +10,7 @@ public class Cliente {
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 6000;
     private static Jugador jugador;
+
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Introduce el nombre del jugador:");
@@ -37,40 +38,49 @@ public class Cliente {
                     out.writeBytes("Cartas recibidas!\n");
                     out.flush();
                     int opcion;
-                    for(int i=0;i<4;i++){
-                        //Recibo la información de la mesa
-                        String linea;
-                        while(!(linea=in.readLine()).equals(".")){
-                            System.out.println(linea);
-                        }
-                        //Recibo el menú de elección
-                        
-                        while(!(linea=in.readLine()).equals(".")){
-                            System.out.println(linea);
-                        }
-                        
-                        opcion = scanner.nextInt();
-                        scanner.nextLine();
-                        out.writeInt(opcion);
-                        out.flush();
+                    for (int i = 0; i < 4; i++) {
+                        boolean fin = in.readBoolean();
+                        while (!fin) {
+                            // Recibo la información de la mesa
+                            String linea;
+                            while (!(linea = in.readLine()).equals(".")) {
+                                System.out.println(linea);
+                            }
+                            // Recibo el menú de elección
 
-                        if(opcion == 3){
-                            boolean cantCorrecta = false;
-                            while(!cantCorrecta){
-                                System.out.println(in.readLine());
-                                int cant = scanner.nextInt();
-                                scanner.nextLine();
-                                out.writeInt(cant);
-                                out.flush();
-                                cantCorrecta = in.readBoolean();
-                                if(!cantCorrecta){
+                            while (!(linea = in.readLine()).equals(".")) {
+                                System.out.println(linea);
+                            }
+
+                            opcion = scanner.nextInt();
+                            scanner.nextLine();
+                            out.writeInt(opcion);
+                            out.flush();
+
+                            if (opcion == 3) {
+                                boolean cantCorrecta = false;
+                                while (!cantCorrecta) {
                                     System.out.println(in.readLine());
+                                    int cant = scanner.nextInt();
+                                    scanner.nextLine();
+                                    out.writeInt(cant);
+                                    out.flush();
+                                    cantCorrecta = in.readBoolean();
+                                    if (!cantCorrecta) {
+                                        System.out.println(in.readLine());
+                                    }
                                 }
                             }
-                        }   //RECIBIR INFORMACIÓN DE GANADOR
+                            fin = in.readBoolean();
+                        }
+
+                        // RECIBIR INFORMACIÓN DE GANADOR
+                        String ganador;
+                        while ((ganador = in.readLine()) != ".") {
+                            System.out.println(ganador);
+                        }
                     }
                 }
-
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

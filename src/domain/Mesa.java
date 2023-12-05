@@ -1,5 +1,6 @@
 package domain;
 
+import java.util.Map.Entry;
 import java.util.*;
 
 public class Mesa {
@@ -10,6 +11,7 @@ public class Mesa {
     private static int ciegaGrande = 30;
     private static int ciegaPequena = 15;
     private int ronda;
+    private Jugador ganador;
 
     public Mesa() {
         jugadores = new HashMap<>();
@@ -17,14 +19,19 @@ public class Mesa {
         fichasMesa = 0;
         apuesta = ciegaGrande;
         ronda = 1;
+        ganador = null;
     }
 
     public int getFichas() {
         return fichasMesa;
     }
 
-    public int getRonda(){
+    public int getRonda() {
         return ronda;
+    }
+
+    public void setRonda(int r) {
+        this.ronda = r;
     }
 
     public void setFichas(int fichas) {
@@ -36,14 +43,16 @@ public class Mesa {
     }
 
     public List<Jugador> getJugadores() {
-        return new ArrayList<>(jugadores.keySet());
+        List<Jugador> jugadores = new ArrayList<>(this.jugadores.keySet());
+        jugadores.sort(Comparator.comparingInt(j -> this.jugadores.get(j)));
+        return jugadores;
     }
 
     public int getApuesta() {
         return apuesta;
     }
 
-    public void siguienteRonda(){
+    public void siguienteRonda() {
         ronda++;
     }
 
@@ -85,6 +94,7 @@ public class Mesa {
         if (fichasJugador >= cant) {
             jugador.setFichas(fichasJugador - cant);
             fichasMesa += cant;
+            jugador.setApuesta(jugador.getApuesta() + cant);
             return true;
         } else {
             return false;
@@ -92,7 +102,7 @@ public class Mesa {
     }
 
     public void establecerOrdenInicial() {
-        List<Jugador> j = getJugadores();
+        List<Jugador> j = new ArrayList<>(jugadores.keySet());
         Collections.shuffle(j);
         jugadores.clear();
         for (int i = 0; i < j.size(); i++) {
@@ -117,5 +127,23 @@ public class Mesa {
 
     public HashMap<Jugador, Integer> getJugadoresOrden() {
         return jugadores;
+    }
+
+    public void comprobarGanador() {
+        List<Jugador> jugadores = getJugadores();
+        List<Integer> jugadoresVivos = new ArrayList<>();
+        int i = 0;
+        while (i < jugadores.size()) {
+            if (jugadores.get(i).getFichas() != 0) {
+                jugadoresVivos.add(i);
+            }
+        }
+        if (jugadoresVivos.size() == 1) {
+            ganador = jugadores.get(jugadoresVivos.get(1));
+        }
+    }
+
+    public Jugador getGanador(){
+        return ganador;
     }
 }

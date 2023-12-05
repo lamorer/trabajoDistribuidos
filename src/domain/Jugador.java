@@ -5,12 +5,14 @@ public class Jugador {
     private Carta carta1;
     private Carta carta2;
     private int fichas;
+    private int apuesta;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
         this.carta1 = null;
         this.carta2 = null;
         this.fichas = 1500;
+        this.apuesta = 0;
     }
 
     public String getNombre() {
@@ -28,6 +30,14 @@ public class Jugador {
 
     public void setFichas(int fichas) {
         this.fichas = fichas;
+    }
+
+    public void setApuesta(int apuesta) {
+        this.apuesta = apuesta;
+    }
+
+    public int getApuesta(){
+        return this.apuesta;
     }
 
     public void recibirCartas(Carta carta1, Carta carta2) {
