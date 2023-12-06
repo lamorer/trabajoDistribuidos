@@ -1,6 +1,7 @@
 package domain;
 
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.*;
 
 public class Mesa {
@@ -46,6 +47,16 @@ public class Mesa {
         List<Jugador> jugadores = new ArrayList<>(this.jugadores.keySet());
         jugadores.sort(Comparator.comparingInt(j -> this.jugadores.get(j)));
         return jugadores;
+    }
+
+    public List<Jugador> getJugadoresVivos() {
+        List<Jugador> jugs = new ArrayList<>(this.jugadores.keySet());
+        jugs.sort(Comparator.comparingInt(j -> this.jugadores.get(j)));
+        List<Jugador> jugadoresVivos = jugs.stream()
+                .filter(j -> this.jugadores.get(j) != 0)
+                .collect(Collectors.toList());
+
+        return jugadoresVivos;
     }
 
     public int getApuesta() {
@@ -137,13 +148,23 @@ public class Mesa {
             if (jugadores.get(i).getFichas() != 0) {
                 jugadoresVivos.add(i);
             }
+            i++;
         }
         if (jugadoresVivos.size() == 1) {
-            ganador = jugadores.get(jugadoresVivos.get(1));
+            ganador = jugadores.get(jugadoresVivos.get(0));
         }
     }
 
-    public Jugador getGanador(){
+    public Jugador getGanador() {
         return ganador;
+    }
+
+    public void establecerOrdenSiguienteRonda() {
+        List<Jugador> j = new ArrayList<>(jugadores.keySet());
+        jugadores.clear();
+        for (int i = 0; i < j.size() - 1; i++) {
+            jugadores.put(j.get(i), i + 2);
+        }
+        jugadores.put(j.get(j.size() - 1), 1);
     }
 }

@@ -10,7 +10,7 @@ public class ReglasPoker {
         // Evaluar las manos de los jugadores y determinar al ganador
         try {
             HashMap<Jugador,ManoPoker> manos = new HashMap<>();
-            List<Jugador> jugadores = mesa.getJugadores();
+            List<Jugador> jugadores = mesa.getJugadoresVivos();
             ExecutorService pool = Executors.newFixedThreadPool(mesa.getJugadores().size());
             final CountDownLatch count = new CountDownLatch(mesa.getJugadores().size());
             for (Jugador j : jugadores) {
