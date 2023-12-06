@@ -30,13 +30,9 @@ public class Cliente {
                     System.out.println("Obtengo mis cartas: ");
                     List<Carta> cartasJugador = (List<Carta>) in.readObject();
 
-                    // Procesa e imprime las cartas de todos los jugadores
                     for (Carta carta : cartasJugador) {
                         System.out.println(carta.toString());
                     }
-
-                    out.writeBytes("Cartas recibidas!\n");
-                    out.flush();
                     int opcion;
                     for (int i = 0; i < 4; i++) {
                         boolean fin = in.readBoolean();
@@ -47,27 +43,29 @@ public class Cliente {
                                 System.out.println(linea);
                             }
                             // Recibo el menú de elección
+                            boolean juega = in.readBoolean();
+                            if(juega){
+                                while (!(linea = in.readLine()).equals(".")) {      //Si no está en la mano, ya no recibe esto!!
+                                    System.out.println(linea);
+                                }
 
-                            while (!(linea = in.readLine()).equals(".")) {
-                                System.out.println(linea);
-                            }
+                                opcion = scanner.nextInt();
+                                scanner.nextLine();
+                                out.writeInt(opcion);
+                                out.flush();
 
-                            opcion = scanner.nextInt();
-                            scanner.nextLine();
-                            out.writeInt(opcion);
-                            out.flush();
-
-                            if (opcion == 3) {
-                                boolean cantCorrecta = false;
-                                while (!cantCorrecta) {
-                                    System.out.println(in.readLine());
-                                    int cant = scanner.nextInt();
-                                    scanner.nextLine();
-                                    out.writeInt(cant);
-                                    out.flush();
-                                    cantCorrecta = in.readBoolean();
-                                    if (!cantCorrecta) {
+                                if (opcion == 3) {
+                                    boolean cantCorrecta = false;
+                                    while (!cantCorrecta) {
                                         System.out.println(in.readLine());
+                                        int cant = scanner.nextInt();
+                                        scanner.nextLine();
+                                        out.writeInt(cant);
+                                        out.flush();
+                                        cantCorrecta = in.readBoolean();
+                                        if (!cantCorrecta) {
+                                            System.out.println(in.readLine());
+                                        }
                                     }
                                 }
                             }
@@ -76,7 +74,7 @@ public class Cliente {
 
                         // RECIBIR INFORMACIÓN DE GANADOR
                         String ganador;
-                        while ((ganador = in.readLine()) != ".") {
+                        while (!(ganador = in.readLine()).equals(".")) {
                             System.out.println(ganador);
                         }
                     }
