@@ -382,7 +382,7 @@ public class Servidor {
                 out.writeBytes("---------------------GANADORES ");
             }
             for (Jugador j : ganadores) {
-                out.writeBytes(j.getNombre() + "----------------------------\n");
+                out.writeBytes(j.getNombre() + (ganadores.size()>1 ? " " : "----------------------------\n"));
                 out.flush();
             }
             for (Jugador j : mesa.getJugadores()) {
