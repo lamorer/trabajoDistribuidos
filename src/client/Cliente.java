@@ -12,17 +12,24 @@ public class Cliente {
 
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Introduce el nombre del jugador:");
-            String nomJugador = scanner.nextLine();
-
+            System.out.println("Esperando a que se conecten el resto de jugadores...");
             try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
                     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
                 Boolean puedeJugar = in.readBoolean();
                 if (puedeJugar) {
+                    System.out.print("Introduce el nombre del jugador: ");
+                    String nomJugador = scanner.nextLine();
                     out.writeBytes(nomJugador + "\n");
                     out.flush();
+                    boolean nomRep = in.readBoolean();
+                    while(nomRep){
+                        System.out.print("Nombre ya registrado. Introduce otro nombre: ");
+                        nomJugador=scanner.nextLine();
+                        out.writeBytes(nomJugador+"\n");
+                        out.flush();
+                        nomRep = in.readBoolean();
+                    }
 
                     boolean hayGanador = false;
                     while(!hayGanador){

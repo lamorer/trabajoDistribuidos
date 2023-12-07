@@ -9,7 +9,7 @@ import java.net.*;
 import java.util.*;
 
 public class Servidor {
-    private static final int NUMERO_JUGADORES_ESPERADOS = 2;
+    private static final int NUMERO_JUGADORES_ESPERADOS = 3;
     private static final int PORT = 6000;
 
     public static void main(String[] args) {
@@ -46,11 +46,9 @@ public class Servidor {
         HashMap<String, JugadorInfo> jugadores = conectarJugadores(clientes, mesa);
         Jugador ganador = null;
         iniciarPartida(mesa);
-        for (Jugador j : mesa.getJugadoresVivos()) {
-            System.out.println(j.getNombre());
-        }
         while (mesa.getGanador() == null) {
             inicializarApuestas(mesa);
+            mesa.setFichas(0);
             ponerCiegas(mesa);
             repartirCartas(jugadores, mesa, baraja);
             mesa.setApuesta(mesa.getCiegaGrande());
@@ -66,7 +64,7 @@ public class Servidor {
                     System.out.println(mesa.informacionMesa());
                     inicializarApuestas(mesa);
                     ganador = hablar(jugadores, mesa);
-                    
+
                     if (ganador == null) {
                         mesa.agregarCartaAMesa(baraja.repartirCarta()); // RIVER
                         System.out.println(mesa.informacionMesa());
@@ -85,13 +83,14 @@ public class Servidor {
             System.out.println(mesa.informacionMesa());
             mesa.comprobarGanador();
             mesa.establecerOrdenSiguienteRonda();
-            enviarBool(jugadores,mesa.getGanador()!=null);
+            enviarBool(jugadores, mesa.getGanador() != null);
         }
-        System.out.println("GANADOR: " + mesa.getGanador());
+        System.out.println("GANADOR: " + mesa.getGanador().getNombre());
     }
 
     public static void enviarBool(HashMap<String, JugadorInfo> jugadores, boolean b) {
-        for (JugadorInfo j : jugadores.values()) {
+        Collection<JugadorInfo> jugadoresInfo = jugadores.values();
+        for (JugadorInfo j : jugadoresInfo) {
             try {
                 ObjectOutputStream out = j.getOutputStream();
                 out.writeBoolean(b);
@@ -104,7 +103,6 @@ public class Servidor {
 
     public static void inicializarApuestas(Mesa mesa) {
         mesa.setApuesta(0);
-        mesa.setFichas(0);
         List<Jugador> jugadores = mesa.getJugadores();
         for (Jugador j : jugadores) {
             j.setApuesta(0);
@@ -120,7 +118,19 @@ public class Servidor {
                 ObjectOutputStream out = new ObjectOutputStream(cliente.getOutputStream());
                 out.writeBoolean(true);
                 out.flush();
-                nomJugador = in.readLine();
+                boolean nomRep = true;
+                while (nomRep) {
+                    nomJugador = in.readLine();
+                    nomRep = false;
+                    List<Jugador> jug = mesa.getJugadores();
+                    for (Jugador j : jug) {
+                        if (nomJugador.equals(j.getNombre())) {
+                            nomRep = true;
+                        }
+                    }
+                    out.writeBoolean(nomRep);
+                    out.flush();
+                }
                 Jugador j = new Jugador(nomJugador);
                 mesa.agregarJugador(j);
                 jugadoresConectados.put(nomJugador, new JugadorInfo(in, out));
@@ -135,9 +145,6 @@ public class Servidor {
         System.out.println("Comienza la partida!");
         mesa.establecerOrdenInicial();
         System.out.println("Orden de juego inicial:");
-        for (Jugador j1 : mesa.getJugadores()) {
-            System.out.println(j1.getNombre());
-        }
     }
 
     public static void ponerCiegas(Mesa mesa) {
@@ -145,7 +152,7 @@ public class Servidor {
         mesa.apostar(mesa.getCiegaPequena(), jugadores.get(0));
         mesa.apostar(mesa.getCiegaGrande(), jugadores.get(1));
         if (mesa.getFichas() != 0) {
-            System.out.println(mesa.getFichas());
+            System.out.println("Bote: " + mesa.getFichas());
         }
         for (Jugador j : jugadores) {
             System.out.println(j.getNombre() + ": " + j.getFichas());
@@ -202,7 +209,7 @@ public class Servidor {
         hablaronTodos = true;
         fin = true;
         for (Jugador j : jugadores) {
-            if (mesa.getJugadoresOrden().get(j) != 0 && j.getApuesta() != mesa.getApuesta() && j.getFichas() != 0) {
+            if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() != mesa.getApuesta() && j.getFichas() != 0) {
                 fin = false;
             }
         }
@@ -234,7 +241,7 @@ public class Servidor {
             hablaronTodos = true;
             fin = true;
             for (Jugador j : jugadores) {
-                if (mesa.getJugadoresOrden().get(j) != 0 && j.getApuesta() < mesa.getApuesta()) {
+                if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() < mesa.getApuesta()) {
                     fin = false;
                 }
             }
@@ -249,7 +256,7 @@ public class Servidor {
             ObjectOutputStream out = s.getOutputStream();
             ObjectInputStream in = s.getInputStream();
             enviarInformacionMesa(in, out, mesa);
-            boolean juega = mesa.getJugadoresOrden().get(j) != 0 && j.getFichas() != 0; // Si es 0, el jugador ya no
+            boolean juega = mesa.getJugadoresOrden().get(j) <= 10 && j.getFichas() != 0; // Si es mayor que 10, el jugador ya no
                                                                                         // está en la mano
             out.writeBoolean(juega);
             out.flush();
@@ -324,7 +331,7 @@ public class Servidor {
         Jugador ganador = null;
         int i = 0;
         while (i < jugadores.size() && gana < 2) {
-            if (jugadoresOrden.get(jugadores.get(i)) != 0) {
+            if (jugadoresOrden.get(jugadores.get(i)) <= 10) {
                 gana++;
                 ganador = jugadores.get(i);
             }
@@ -350,6 +357,19 @@ public class Servidor {
         }
         for (JugadorInfo j : clientes.values()) {
             enviarInformacionJugadores(j.getInputStream(), j.getOutputStream(), mesa, ganadores);
+        }
+        List<Jugador> jug = mesa.getJugadores();
+        for (Jugador j : jug) {
+            if (j.getFichas() == 0) {
+                mesa.removeJugador(j);
+                try {
+                    clientes.get(j.getNombre()).getInputStream().close();
+                    clientes.get(j.getNombre()).getOutputStream().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                clientes.remove(j.getNombre());
+            }
         }
     }
 
@@ -387,7 +407,7 @@ public class Servidor {
     }
 
     public static void noIr(Jugador j, Mesa mesa) {
-        mesa.setOrdenJugador(j, 0);
+        mesa.aumentarOrdenJugador(j, 10);
     }
 
     public static void igualarPasar(Jugador j, Mesa mesa, String igualarPasar) {

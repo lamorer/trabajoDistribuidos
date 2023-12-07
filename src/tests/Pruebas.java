@@ -3,6 +3,8 @@ package tests;
 import java.util.*;
 import java.util.concurrent.*;
 
+import java.util.Map.Entry;
+
 import domain.*;
 
 public class Pruebas {
@@ -44,14 +46,18 @@ public class Pruebas {
         // Evaluar las manos de los jugadores y determinar al ganador
         try {
             HashMap<Jugador,ManoPoker> manos = new HashMap<>();
-            List<Jugador> jugadores = mesa.getJugadores();
+            List<Jugador> jugadores = mesa.getJugadoresVivos();
             ExecutorService pool = Executors.newFixedThreadPool(mesa.getJugadores().size());
-            final CountDownLatch count = new CountDownLatch(mesa.getJugadores().size());
+            final CyclicBarrier count = new CyclicBarrier(mesa.getJugadores().size()+1);
             for (Jugador j : jugadores) {
                 pool.execute(new Runnable() {
                     public void run() {
+                        try{
                         manos.put(j,evaluarMano(j, mesa.getCartasEnMesa()));
-                        count.countDown();
+                        count.await();
+                        } catch (InterruptedException | BrokenBarrierException e){
+                            e.printStackTrace();
+                        }
                     }
                 });
             }
@@ -92,7 +98,7 @@ public class Pruebas {
             System.out.println(manoGanadora.getDescripcion()+": "+manoGanadora.getCartas());
             pool.shutdown();
             return jugadoresGanadores;
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
         return null;
@@ -331,11 +337,11 @@ public class Pruebas {
 
         } else {
             List<Carta> list = new ArrayList<>();
+            list.add(combinacion.get(1));
             list.add(combinacion.get(2));
             list.add(combinacion.get(3));
             list.add(combinacion.get(4));
-            list.add(combinacion.get(5));
-            list.add(combinacion.get(1));
+            list.add(combinacion.get(0));
             return new ManoPoker(Mano.escalera, list);
         }
     }

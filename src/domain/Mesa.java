@@ -53,7 +53,7 @@ public class Mesa {
         List<Jugador> jugs = new ArrayList<>(this.jugadores.keySet());
         jugs.sort(Comparator.comparingInt(j -> this.jugadores.get(j)));
         List<Jugador> jugadoresVivos = jugs.stream()
-                .filter(j -> this.jugadores.get(j) != 0)
+                .filter(j -> this.jugadores.get(j) > 10)
                 .collect(Collectors.toList());
 
         return jugadoresVivos;
@@ -132,8 +132,8 @@ public class Mesa {
         return s;
     }
 
-    public void setOrdenJugador(Jugador j, int i) {
-        jugadores.put(j, i);
+    public void aumentarOrdenJugador(Jugador j, int i) {
+        jugadores.put(j, jugadores.get(j)+i);
     }
 
     public HashMap<Jugador, Integer> getJugadoresOrden() {
@@ -160,11 +160,20 @@ public class Mesa {
     }
 
     public void establecerOrdenSiguienteRonda() {
-        List<Jugador> j = new ArrayList<>(jugadores.keySet());
+        for(Entry<Jugador,Integer> j: jugadores.entrySet()){
+            if(j.getValue() > 10){
+                jugadores.put(j.getKey(), jugadores.get(j.getKey())-10);
+            }
+        }
+        List<Jugador> j = getJugadores();
         jugadores.clear();
         for (int i = 0; i < j.size() - 1; i++) {
             jugadores.put(j.get(i), i + 2);
         }
         jugadores.put(j.get(j.size() - 1), 1);
+    }
+
+    public void removeJugador(Jugador j){
+        jugadores.remove(j);
     }
 }

@@ -11,13 +11,17 @@ public class ReglasPoker {
         try {
             HashMap<Jugador,ManoPoker> manos = new HashMap<>();
             List<Jugador> jugadores = mesa.getJugadoresVivos();
-            ExecutorService pool = Executors.newFixedThreadPool(mesa.getJugadores().size());
-            final CountDownLatch count = new CountDownLatch(mesa.getJugadores().size());
+            ExecutorService pool = Executors.newFixedThreadPool(jugadores.size());
+            final CyclicBarrier count = new CyclicBarrier(jugadores.size()+1);
             for (Jugador j : jugadores) {
                 pool.execute(new Runnable() {
                     public void run() {
+                        try{
                         manos.put(j,evaluarMano(j, mesa.getCartasEnMesa()));
-                        count.countDown();
+                        count.await();
+                        } catch (InterruptedException | BrokenBarrierException e){
+                            e.printStackTrace();
+                        }
                     }
                 });
             }
@@ -58,7 +62,7 @@ public class ReglasPoker {
             System.out.println(manoGanadora.getDescripcion()+": "+manoGanadora.getCartas());
             pool.shutdown();
             return jugadoresGanadores;
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
         return null;
