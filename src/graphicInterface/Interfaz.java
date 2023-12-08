@@ -2,54 +2,74 @@ package graphicInterface;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Interfaz extends JFrame {
-    private JLabel[] communityCards;
-    private JLabel[][] playerCards;
-    private JLabel[] playerChips;
+
+    private JTextField nombreTextField;
 
     public Interfaz() {
-        setTitle("Mesa de Poker");
-        setSize(800, 600);
+        // Configuración del JFrame
+        setTitle("Interfaz con Botones");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(300, 200);
         setLayout(new BorderLayout());
 
-        // Zona de cartas comunitarias
-        JPanel communityCardsPanel = new JPanel();
-        communityCards = new JLabel[5];
-        for (int i = 0; i < 5; i++) {
-            communityCards[i] = new JLabel("?");
-            communityCardsPanel.add(communityCards[i]);
-        }
-        add(communityCardsPanel, BorderLayout.CENTER);
+        // Crear el área de texto para el nombre
+        nombreTextField = new JTextField();
+        add(nombreTextField, BorderLayout.NORTH);
 
-        // Posiciones de los jugadores
-        JPanel playersPanel = new JPanel();
-        playersPanel.setLayout(new GridLayout(0, 4)); // Puedes ajustar el número de jugadores
-        playerCards = new JLabel[4][2];
-        playerChips = new JLabel[4];
-        for (int i = 0; i < 4; i++) {
-            JPanel playerInfo = new JPanel();
-            playerInfo.setLayout(new BoxLayout(playerInfo, BoxLayout.Y_AXIS));
+        // Crear los botones
+        JButton noIrButton = new JButton("No ir");
+        JButton pasarButton = new JButton("Pasar");
+        JButton subirButton = new JButton("Subir");
 
-            for (int j = 0; j < 2; j++) {
-                playerCards[i][j] = new JLabel("?");
-                playerInfo.add(playerCards[i][j]);
+        // Agregar oyentes de eventos a los botones
+        noIrButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Acciones cuando se hace clic en el botón "No ir"
+                JOptionPane.showMessageDialog(Interfaz.this, "No ir pulsado");
             }
+        });
 
-            playerChips[i] = new JLabel("Chips: 1000"); // Reemplaza con los valores reales de fichas
-            playerInfo.add(playerChips[i]);
+        pasarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Acciones cuando se hace clic en el botón "Pasar"
+                JOptionPane.showMessageDialog(Interfaz.this, "Pasar pulsado");
+            }
+        });
 
-            playersPanel.add(playerInfo);
-        }
-        add(playersPanel, BorderLayout.SOUTH);
+        subirButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Acciones cuando se hace clic en el botón "Subir"
+                JOptionPane.showMessageDialog(Interfaz.this, "Subir pulsado");
+            }
+        });
 
+        // Crear un panel para contener los botones
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(noIrButton);
+        buttonPanel.add(pasarButton);
+        buttonPanel.add(subirButton);
+
+        // Agregar el panel de botones al JFrame
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Hacer visible la interfaz
         setVisible(true);
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new Interfaz();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Interfaz();
+            }
         });
     }
 }
+   
