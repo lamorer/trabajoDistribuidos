@@ -3,8 +3,6 @@ package tests;
 import java.util.*;
 import java.util.concurrent.*;
 
-import java.util.Map.Entry;
-
 import domain.*;
 
 public class Pruebas {
