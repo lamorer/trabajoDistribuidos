@@ -53,7 +53,7 @@ public class Mesa {
         List<Jugador> jugs = new ArrayList<>(this.jugadores.keySet());
         jugs.sort(Comparator.comparingInt(j -> this.jugadores.get(j)));
         List<Jugador> jugadoresVivos = jugs.stream()
-                .filter(j -> this.jugadores.get(j) > 10)
+                .filter(j -> this.jugadores.get(j) <= 10)
                 .collect(Collectors.toList());
 
         return jugadoresVivos;
@@ -110,6 +110,14 @@ public class Mesa {
         } else {
             return false;
         }
+    }
+
+    public void quitarFichas(int cant){
+        fichasMesa-=cant;
+    }
+
+    public void limpiarMesa(){
+        cartasEnMesa.clear();
     }
 
     public void establecerOrdenInicial() {

@@ -39,43 +39,46 @@ public class Cliente {
                         for (Carta carta : cartasJugador) {
                             System.out.println(carta.toString());
                         }
-                        int opcion;
-                        for (int i = 0; i < 4; i++) {
-                            boolean fin = in.readBoolean();
-                            while (!fin) {
-                                // Recibo la información de la mesa
-                                String linea;
-                                while (!(linea = in.readLine()).equals(".")) {
-                                    System.out.println(linea);
-                                }
-                                // Recibo el menú de elección
-                                boolean juega = in.readBoolean();
-                                if (juega) {
-                                    while (!(linea = in.readLine()).equals(".")) { 
+                        boolean enAllIn = in.readBoolean();
+                        if(!enAllIn){
+                            int opcion;
+                            for (int i = 0; i < 4; i++) {
+                                boolean fin = in.readBoolean();
+                                while (!fin) {
+                                    // Recibo la información de la mesa
+                                    String linea;
+                                    while (!(linea = in.readLine()).equals(".")) {
                                         System.out.println(linea);
                                     }
+                                    // Recibo el menú de elección
+                                    boolean juega = in.readBoolean();
+                                    if (juega) {
+                                        while (!(linea = in.readLine()).equals(".")) { 
+                                            System.out.println(linea);
+                                        }
 
-                                    opcion = scanner.nextInt();
-                                    scanner.nextLine();
-                                    out.writeInt(opcion);
-                                    out.flush();
+                                        opcion = scanner.nextInt();
+                                        scanner.nextLine();
+                                        out.writeInt(opcion);
+                                        out.flush();
 
-                                    if (opcion == 3) {
-                                        boolean cantCorrecta = false;
-                                        while (!cantCorrecta) {
-                                            System.out.println(in.readLine());
-                                            int cant = scanner.nextInt();
-                                            scanner.nextLine();
-                                            out.writeInt(cant);
-                                            out.flush();
-                                            cantCorrecta = in.readBoolean();
-                                            if (!cantCorrecta) {
+                                        if (opcion == 3) {
+                                            boolean cantCorrecta = false;
+                                            while (!cantCorrecta) {
                                                 System.out.println(in.readLine());
+                                                int cant = scanner.nextInt();
+                                                scanner.nextLine();
+                                                out.writeInt(cant);
+                                                out.flush();
+                                                cantCorrecta = in.readBoolean();
+                                                if (!cantCorrecta) {
+                                                    System.out.println(in.readLine());
+                                                }
                                             }
                                         }
                                     }
+                                    fin = in.readBoolean();
                                 }
-                                fin = in.readBoolean();
                             }
                         }
                         // RECIBIR INFORMACIÓN DE GANADOR
@@ -85,6 +88,10 @@ public class Cliente {
                         }
                     
                         hayGanador = in.readBoolean();
+                    }
+                    String ganadorFinal;
+                    while (!(ganadorFinal = in.readLine()).equals(".")) {
+                        System.out.println(ganadorFinal);
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {

@@ -20,8 +20,6 @@ public class Servidor {
             System.out.println("Servidor de poker en funcionamiento en el puerto " + PORT);
             while (true) {
                 Mesa mesa = new Mesa(); // Crearemos tantas mesas y barajas como partidas se abran
-                Baraja baraja = new Baraja();
-                baraja.barajar();
                 try {
                     for (int i = 0; i < NUMERO_JUGADORES_ESPERADOS; i++) { // Dejamos conectar a 6 jugadores
                         Socket cliente = servidor.accept();
@@ -29,7 +27,7 @@ public class Servidor {
                     }
                     pool.execute(new Runnable() {
                         public void run() {
-                            atenderPeticion(clientes, mesa, baraja);
+                            atenderPeticion(clientes, mesa);
                         }
                     });
                 } catch (IOException e) {
@@ -42,11 +40,15 @@ public class Servidor {
         }
     }
 
-    public static void atenderPeticion(List<Socket> clientes, Mesa mesa, Baraja baraja) {
+    public static void atenderPeticion(List<Socket> clientes, Mesa mesa) {
         HashMap<String, JugadorInfo> jugadores = conectarJugadores(clientes, mesa);
         Jugador ganador = null;
         iniciarPartida(mesa);
+        Baraja baraja;
         while (mesa.getGanador() == null) {
+            baraja = new Baraja();
+            baraja.barajar();
+            mesa.limpiarMesa();
             inicializarApuestas(mesa);
             mesa.setFichas(0);
             ponerCiegas(mesa);
@@ -86,6 +88,11 @@ public class Servidor {
             enviarBool(jugadores, mesa.getGanador() != null);
         }
         System.out.println("GANADOR: " + mesa.getGanador().getNombre());
+        List<Jugador> ganadorFinal = new ArrayList<>();
+        ganadorFinal.add(mesa.getGanador());
+        for (JugadorInfo j : jugadores.values()) {
+            enviarInformacionJugadores(j.getInputStream(), j.getOutputStream(), mesa, ganadorFinal);
+        }
     }
 
     public static void enviarBool(HashMap<String, JugadorInfo> jugadores, boolean b) {
@@ -186,53 +193,29 @@ public class Servidor {
         Jugador ganador;
         boolean fin = false;
         boolean hablaronTodos = false;
-        // Hablan todos una primera vez
-        for (int i = 0; i < jugadores.size(); i++) {
-            try {
-                int indiceJugador = (indicePrimerJugador + i) % jugadores.size();
-                Jugador j = jugadores.get(indiceJugador);
-                JugadorInfo s = clientes.get(j.getNombre());
-                ObjectOutputStream out = s.getOutputStream();
-                out.writeBoolean(fin);
-                out.flush();
-                accionJugador(s, mesa, j, mesa.getRonda());
-                ganador = comprobar(mesa);
-                if (ganador != null) {
-                    System.out.print("Ganador: ");
-                    ganador.mostrarCartas();
-                    return ganador;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        boolean enAllIn = false;
+        for(Jugador j: mesa.getJugadoresVivos()){
+            if(j.getFichas()==0){   //Si hay algún jugador en All-In se finaliza la ronda
+                enAllIn=true;
             }
         }
-        hablaronTodos = true;
-        fin = true;
-        for (Jugador j : jugadores) {
-            if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() != mesa.getApuesta() && j.getFichas() != 0) {
-                fin = false;
-            }
-        }
-        // Si alguien falta por hablar, entramos en el bucle
-        while (!(fin && hablaronTodos)) {
+        enviarBool(clientes, enAllIn);
+        if(!enAllIn){
+            // Hablan todos una primera vez
             for (int i = 0; i < jugadores.size(); i++) {
                 try {
                     int indiceJugador = (indicePrimerJugador + i) % jugadores.size();
                     Jugador j = jugadores.get(indiceJugador);
                     JugadorInfo s = clientes.get(j.getNombre());
                     ObjectOutputStream out = s.getOutputStream();
-                    if (j.getApuesta() != mesa.getApuesta()) {
-                        out.writeBoolean(hablaronTodos & fin);
-                        out.flush();
-                        accionJugador(s, mesa, j, mesa.getRonda());
-                        ganador = comprobar(mesa);
-                        if (ganador != null) {
-                            System.out.print("Ganador: ");
-                            ganador.mostrarCartas();
-                            return ganador;
-                        }
-                    } else {
-                        out.writeBoolean(false);
+                    out.writeBoolean(fin);
+                    out.flush();
+                    accionJugador(s, mesa, j, mesa.getRonda());
+                    ganador = comprobar(mesa);
+                    if (ganador != null) {
+                        System.out.print("Ganador: ");
+                        ganador.mostrarCartas();
+                        return ganador;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -241,8 +224,42 @@ public class Servidor {
             hablaronTodos = true;
             fin = true;
             for (Jugador j : jugadores) {
-                if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() < mesa.getApuesta()) {
+                if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() != mesa.getApuesta() && j.getFichas() != 0) {
                     fin = false;
+                }
+            }
+            // Si alguien falta por hablar, entramos en el bucle
+            while (!(fin && hablaronTodos)) {
+                for (int i = 0; i < jugadores.size(); i++) {
+                    try {
+                        int indiceJugador = (indicePrimerJugador + i) % jugadores.size();
+                        Jugador j = jugadores.get(indiceJugador);
+                        JugadorInfo s = clientes.get(j.getNombre());
+                        ObjectOutputStream out = s.getOutputStream();
+                        if (j.getApuesta() != mesa.getApuesta()) {
+                            out.writeBoolean(hablaronTodos && fin);
+                            out.flush();
+                            accionJugador(s, mesa, j, mesa.getRonda());
+                            ganador = comprobar(mesa);
+                            if (ganador != null) {
+                                System.out.print("Ganador: ");
+                                ganador.mostrarCartas();
+                                return ganador;
+                            }
+                        } else {
+                            out.writeBoolean(false);
+                            out.flush();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                hablaronTodos = true;
+                fin = true;
+                for (Jugador j : jugadores) {
+                    if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() < mesa.getApuesta()) {
+                        fin = false;
+                    }
                 }
             }
         }
@@ -256,12 +273,22 @@ public class Servidor {
             ObjectOutputStream out = s.getOutputStream();
             ObjectInputStream in = s.getInputStream();
             enviarInformacionMesa(in, out, mesa);
-            boolean juega = mesa.getJugadoresOrden().get(j) <= 10 && j.getFichas() != 0; // Si es mayor que 10, el jugador ya no
-                                                                                        // está en la mano
+            // List<Jugador> jugadoresVivos = mesa.getJugadoresVivos();
+            boolean juega = true;
+            // for (Jugador j1 : jugadoresVivos) {
+            // if (j1.getFichas() == 0) {
+            // juega = false; // Si algún jugador está en all-in, el resto no pueden subir
+            // la apuesta.
+            // }
+            // }
+            if (juega) {
+                juega = mesa.getJugadoresOrden().get(j) <= 10 && j.getFichas() != 0; // Si es mayor que 10, el jugador
+                                                                                     // ya no está en la mano
+            }
             out.writeBoolean(juega);
             out.flush();
             if (juega) {
-                String igualarPasar = "Igualar";
+                String igualarPasar = "Igualar a " + mesa.getApuesta();
                 if ((mesa.getRonda() == 1 && j.getApuesta() == mesa.getCiegaGrande()
                         && mesa.getApuesta() == mesa.getCiegaGrande())
                         || (mesa.getRonda() != 1 && mesa.getApuesta() == 0)) {
@@ -363,8 +390,15 @@ public class Servidor {
             if (j.getFichas() == 0) {
                 mesa.removeJugador(j);
                 try {
+                    ObjectOutputStream out = clientes.get(j.getNombre()).getOutputStream();
+                    out.writeBoolean(true);
+                    out.flush();
+                    out.writeBytes("Has finalizado en posición " + clientes.values().size() + "/"
+                            + NUMERO_JUGADORES_ESPERADOS + "\n");
+                    out.writeBytes(".\n");
+                    out.flush();
                     clientes.get(j.getNombre()).getInputStream().close();
-                    clientes.get(j.getNombre()).getOutputStream().close();
+                    out.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -382,7 +416,7 @@ public class Servidor {
                 out.writeBytes("---------------------GANADORES ");
             }
             for (Jugador j : ganadores) {
-                out.writeBytes(j.getNombre() + (ganadores.size()>1 ? " " : "----------------------------\n"));
+                out.writeBytes(j.getNombre() + (ganadores.size() > 1 ? " " : "----------------------------\n"));
                 out.flush();
             }
             for (Jugador j : mesa.getJugadores()) {
@@ -411,9 +445,26 @@ public class Servidor {
     }
 
     public static void igualarPasar(Jugador j, Mesa mesa, String igualarPasar) {
-        if (igualarPasar.equals("Igualar")) {
-            System.out.println("Ha apostado " + (mesa.getApuesta() - j.getApuesta()));
-            mesa.apostar(mesa.getApuesta() - j.getApuesta(), j);
+        if (igualarPasar.split(" ")[0].equals("Igualar")) {
+            int fichas = j.getFichas();
+            if (mesa.getApuesta() > fichas) {
+                List<Jugador> jugs = mesa.getJugadoresVivos();
+                int num = 0;
+                for (Jugador j1 : jugs) {
+                    if (!j1.getNombre().equals(j.getNombre()) && j1.getApuesta() == mesa.getApuesta()) {
+                        j1.setFichas(j1.getFichas() + mesa.getApuesta() - fichas);
+                        j1.setApuesta(fichas);
+                        num++;
+                    }
+                }
+                mesa.quitarFichas((mesa.getApuesta() - fichas) * num);
+                mesa.apostar(fichas, j);
+                mesa.setApuesta(fichas);
+                System.out.println("Ha apostado " + fichas);
+            } else {
+                System.out.println("Ha apostado " + (mesa.getApuesta() - j.getApuesta()));
+                mesa.apostar(mesa.getApuesta() - j.getApuesta(), j);
+            }
         }
     }
 
