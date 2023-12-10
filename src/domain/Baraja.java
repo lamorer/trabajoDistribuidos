@@ -7,6 +7,9 @@ public class Baraja {
     private Carta[] baraja = new Carta[NUM_CARTAS];
     private int size;
 
+    // PRE: --
+    // POST: Crea una instancia de la clase Baraja con todas las cartas
+    // inicializadas.
     public Baraja() {
         this.size = NUM_CARTAS;
         Palo[] palos = Palo.values();
@@ -20,6 +23,8 @@ public class Baraja {
         }
     }
 
+    // PRE: --
+    // POST: Baraja las cartas en la baraja de forma aleatoria.
     public void barajar() {
         Random random = new Random();
         for (int i = NUM_CARTAS - 1; i > 0; i--) {
@@ -30,6 +35,10 @@ public class Baraja {
         }
     }
 
+    // PRE: Existen cartas en la baraja
+    // POST: devuelve la última carta de la baraja y disminuye el tamaño de la baraja
+    // en 1.
+    // Si no hay cartas disponibles, imprime un mensaje y devuelve null.
     public Carta repartirCarta() {
         if (size > 0) {
             size--;
@@ -40,10 +49,14 @@ public class Baraja {
         }
     }
 
+    // PRE: --
+    // POST: devuelve el tamaño actual de la baraja.
     public int getSize() {
         return size;
     }
 
+    // PRE: --
+    // POST: Muestra las cartas de la baraja en la consola.
     public void showBaraja() {
         for (int i = 0; i < baraja.length; i++) {
             System.out.println(baraja[i].toString());

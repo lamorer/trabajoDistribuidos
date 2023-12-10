@@ -6,20 +6,23 @@ import java.util.concurrent.*;
 import domain.*;
 
 public class ReglasPoker {
+    // PRE: mesa es una instancia válida de la clase Mesa.
+    // POST: Devuelve la lista de jugadores ganadores después de evaluar las manos
+    // de los jugadores.
     public static List<Jugador> determinarGanador(Mesa mesa) {
         // Evaluar las manos de los jugadores y determinar al ganador
         try {
-            HashMap<Jugador,ManoPoker> manos = new HashMap<>();
+            HashMap<Jugador, ManoPoker> manos = new HashMap<>();
             List<Jugador> jugadores = mesa.getJugadoresVivos();
             ExecutorService pool = Executors.newFixedThreadPool(jugadores.size());
-            final CyclicBarrier count = new CyclicBarrier(jugadores.size()+1);
+            final CyclicBarrier count = new CyclicBarrier(jugadores.size() + 1);
             for (Jugador j : jugadores) {
                 pool.execute(new Runnable() {
                     public void run() {
-                        try{
-                        manos.put(j,evaluarMano(j, mesa.getCartasEnMesa()));
-                        count.await();
-                        } catch (InterruptedException | BrokenBarrierException e){
+                        try {
+                            manos.put(j, evaluarMano(j, mesa.getCartasEnMesa()));
+                            count.await();
+                        } catch (InterruptedException | BrokenBarrierException e) {
                             e.printStackTrace();
                         }
                     }
@@ -59,7 +62,7 @@ public class ReglasPoker {
                     }
                 }
             }
-            System.out.println(manoGanadora.getDescripcion()+": "+manoGanadora.getCartas());
+            System.out.println(manoGanadora.getDescripcion() + ": " + manoGanadora.getCartas());
             pool.shutdown();
             return jugadoresGanadores;
         } catch (InterruptedException | BrokenBarrierException e) {
@@ -68,6 +71,10 @@ public class ReglasPoker {
         return null;
     }
 
+    // PRE: jugador es una instancia válida de la clase Jugador.
+    // cartasEnMesa es una lista válida de instancias de la clase Carta.
+    // POST: Devuelve la mejor mano de un jugador después de evaluar sus cartas
+    // junto con las cartas en la mesa.
     private static ManoPoker evaluarMano(Jugador jugador, List<Carta> cartasEnMesa) {
         // la lista de cartas contiene la lista de 5 cartas de la mano ordenadas según
         // la jugada (las cartas que acompaña se ordenan por orden desciendente)
@@ -105,10 +112,10 @@ public class ReglasPoker {
             } else if (m.getValor() == mejorMano.getValor()) {
                 boolean mismaMano = false;
                 boolean nuevaMano = false;
-                int i=0;
+                int i = 0;
                 int length = mejorMano.getCartas().size();
-                while(i<length && !mismaMano && !nuevaMano){
-                    if(mejorMano.getCartas().get(i).getNumero()<m.getCartas().get(i).getNumero()){
+                while (i < length && !mismaMano && !nuevaMano) {
+                    if (mejorMano.getCartas().get(i).getNumero() < m.getCartas().get(i).getNumero()) {
                         mejorMano = m;
                     }
                     i++;
@@ -168,6 +175,11 @@ public class ReglasPoker {
             }
         }
     }
+
+    // PRE: Los parámetros de cada método son instancias válidas según su tipo y
+    // descripción.
+    // POST: Los métodos realizan las evaluaciones correspondientes y devuelven true
+    // o la mano correspondiente si son del tipo esperado.
 
     private static boolean esEscaleraReal(List<Carta> combinacion) {
         // Verificar si las cartas son consecutivas del 10 al A
@@ -408,6 +420,8 @@ public class ReglasPoker {
         return null;
     }
 
+    // PRE: combinacion es una lista de cartas
+    // POST: Devuelve la lista de cartas ordenadas en orden descendente
     private static List<Carta> ordenarCartas(List<Carta> combinacion) {
         Collections.sort(combinacion, new Comparator<Carta>() {
             @Override
@@ -419,12 +433,28 @@ public class ReglasPoker {
         return combinacion;
     }
 
+    // PRE: cartas es una lista válida de instancias de la clase Carta.
+    // tam es un entero no negativo que representa el tamaño de las combinaciones
+    // deseadas.
+    // POST: Devuelve una lista de todas las combinaciones de cartas de tamaño 'tam'
+    // generadas a partir de la lista 'cartas'.
     private static List<List<Carta>> generarCombinaciones(List<Carta> cartas, int tam) {
         List<List<Carta>> combinaciones = new ArrayList<>();
         generarCombinacionesAux(cartas, tam, 0, new ArrayList<>(), combinaciones);
         return combinaciones;
     }
 
+    // PRE: cartas es una lista válida de instancias de la clase Carta.
+    // tam es un entero no negativo que representa el tamaño de las combinaciones
+    // deseadas.
+    // inicio es un índice válido en la lista 'cartas'.
+    // combinacionActual es una lista válida de instancias de la clase Carta.
+    // combinaciones es una lista válida de listas de instancias de la clase Carta.
+    // POST: Llena la lista 'combinaciones' con todas las combinaciones de cartas de
+    // tamaño 'tam' generadas a partir
+    // de la lista 'cartas' usando la técnica de backtracking, comenzando en el
+    // índice 'inicio'.
+    // No modifica las listas originales 'cartas' y 'combinacionActual'.
     private static void generarCombinacionesAux(List<Carta> cartas, int tam, int inicio, List<Carta> combinacionActual,
             List<List<Carta>> combinaciones) {
         if (tam == 0) {

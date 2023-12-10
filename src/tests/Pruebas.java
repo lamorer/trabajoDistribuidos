@@ -21,13 +21,13 @@ public class Pruebas {
         mesa.getJugadores().get(1).mostrarCartas();
         mesa.getJugadores().get(2).mostrarCartas();
         System.out.println("----------------------------------------");
-        for(int i=0;i<5;i++){
+        for (int i = 0; i < 5; i++) {
             mesa.agregarCartaAMesa(baraja.repartirCarta());
         }
         System.out.println(mesa.getCartasEnMesa());
         List<Jugador> ganadores = determinarGanador(mesa);
-        for(int m=0;m<ganadores.size();m++){
-            System.out.println("Ha ganado: "+ganadores.get(m).getNombre());
+        for (int m = 0; m < ganadores.size(); m++) {
+            System.out.println("Ha ganado: " + ganadores.get(m).getNombre());
             ganadores.get(m).mostrarCartas();
         }
 
@@ -43,17 +43,17 @@ public class Pruebas {
     public static List<Jugador> determinarGanador(Mesa mesa) {
         // Evaluar las manos de los jugadores y determinar al ganador
         try {
-            HashMap<Jugador,ManoPoker> manos = new HashMap<>();
+            HashMap<Jugador, ManoPoker> manos = new HashMap<>();
             List<Jugador> jugadores = mesa.getJugadoresVivos();
             ExecutorService pool = Executors.newFixedThreadPool(mesa.getJugadores().size());
-            final CyclicBarrier count = new CyclicBarrier(mesa.getJugadores().size()+1);
+            final CyclicBarrier count = new CyclicBarrier(mesa.getJugadores().size() + 1);
             for (Jugador j : jugadores) {
                 pool.execute(new Runnable() {
                     public void run() {
-                        try{
-                        manos.put(j,evaluarMano(j, mesa.getCartasEnMesa()));
-                        count.await();
-                        } catch (InterruptedException | BrokenBarrierException e){
+                        try {
+                            manos.put(j, evaluarMano(j, mesa.getCartasEnMesa()));
+                            count.await();
+                        } catch (InterruptedException | BrokenBarrierException e) {
                             e.printStackTrace();
                         }
                     }
@@ -93,7 +93,7 @@ public class Pruebas {
                     }
                 }
             }
-            System.out.println(manoGanadora.getDescripcion()+": "+manoGanadora.getCartas());
+            System.out.println(manoGanadora.getDescripcion() + ": " + manoGanadora.getCartas());
             pool.shutdown();
             return jugadoresGanadores;
         } catch (InterruptedException | BrokenBarrierException e) {
@@ -139,10 +139,10 @@ public class Pruebas {
             } else if (m.getValor() == mejorMano.getValor()) {
                 boolean mismaMano = false;
                 boolean nuevaMano = false;
-                int i=0;
+                int i = 0;
                 int length = mejorMano.getCartas().size();
-                while(i<length && !mismaMano && !nuevaMano){
-                    if(mejorMano.getCartas().get(i).getNumero()<m.getCartas().get(i).getNumero()){
+                while (i < length && !mismaMano && !nuevaMano) {
+                    if (mejorMano.getCartas().get(i).getNumero() < m.getCartas().get(i).getNumero()) {
                         mejorMano = m;
                     }
                     i++;

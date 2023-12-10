@@ -9,9 +9,12 @@ import java.net.*;
 import java.util.*;
 
 public class Servidor {
-    private static final int NUMERO_JUGADORES_ESPERADOS = 3;
+    private static final int NUMERO_JUGADORES_ESPERADOS = 6;
     private static final int PORT = 6000;
 
+    // PRE: --
+    // POST: Se inicia el servidor y se espera la conexión de jugadores para iniciar
+    // partidas.
     public static void main(String[] args) {
         ExecutorService pool = Executors.newCachedThreadPool();
         List<Socket> clientes = new ArrayList<>();
@@ -40,6 +43,9 @@ public class Servidor {
         }
     }
 
+    // PRE: clientes contiene conexiones de clientes válidas. mesa es una instancia
+    // válida de la clase Mesa.
+    // POST: Atiende la petición de los jugadores y maneja la lógica de la partida.
     public static void atenderPeticion(List<Socket> clientes, Mesa mesa) {
         HashMap<String, JugadorInfo> jugadores = conectarJugadores(clientes, mesa);
         Jugador ganador = null;
@@ -95,6 +101,8 @@ public class Servidor {
         }
     }
 
+    // PRE: jugadores contiene información válida de los jugadores.
+    // POST: Envía un booleano a todos los jugadores conectados.
     public static void enviarBool(HashMap<String, JugadorInfo> jugadores, boolean b) {
         Collection<JugadorInfo> jugadoresInfo = jugadores.values();
         for (JugadorInfo j : jugadoresInfo) {
@@ -108,6 +116,8 @@ public class Servidor {
         }
     }
 
+    // PRE: mesa es una instancia válida de la clase Mesa.
+    // POST: Inicializa las apuestas en la mesa.
     public static void inicializarApuestas(Mesa mesa) {
         mesa.setApuesta(0);
         List<Jugador> jugadores = mesa.getJugadores();
@@ -116,6 +126,11 @@ public class Servidor {
         }
     }
 
+    // PRE: clientes contiene conexiones de clientes válidas. mesa es una instancia
+    // válida de la clase Mesa.
+    // POST: Conecta a los jugadores al servidor. Se valida el nombre de los
+    // jugadores para evitar repeticiones. La información de los jugadores se
+    // almacena en jugadoresConectados.
     public static HashMap<String, JugadorInfo> conectarJugadores(List<Socket> clientes, Mesa mesa) {
         String nomJugador = "";
         HashMap<String, JugadorInfo> jugadoresConectados = new HashMap<>();
@@ -148,12 +163,16 @@ public class Servidor {
         return jugadoresConectados;
     }
 
+    // PRE: mesa es una instancia válida de la clase Mesa.
+    // POST: Inicia la partida, estableciendo el orden inicial de juego.
     private static void iniciarPartida(Mesa mesa) {
         System.out.println("Comienza la partida!");
         mesa.establecerOrdenInicial();
         System.out.println("Orden de juego inicial:");
     }
 
+    // PRE: mesa es una instancia válida de la clase Mesa.
+    // POST: Coloca las ciegas en la mesa, realizando apuestas iniciales.
     public static void ponerCiegas(Mesa mesa) {
         List<Jugador> jugadores = mesa.getJugadores();
         mesa.apostar(mesa.getCiegaPequena(), jugadores.get(0));
@@ -166,6 +185,10 @@ public class Servidor {
         }
     }
 
+    // PRE: clientes contiene información válida de los jugadores conectados. mesa
+    // es una instancia válida de la clase Mesa. baraja es una instancia válida de
+    // la clase Baraja.
+    // POST: Reparte las cartas iniciales a los jugadores.
     private static void repartirCartas(HashMap<String, JugadorInfo> clientes, Mesa mesa, Baraja baraja) {
         mesa.repartirCartasIniciales(baraja);
         mesa.setRonda(1);
@@ -184,6 +207,10 @@ public class Servidor {
         }
     }
 
+    // PRE: clientes contiene información válida de los jugadores conectados.
+    // mesa es una instancia válida de la clase Mesa.
+    // POST: Los jugadores realizan acciones durante la ronda, como apostar, igualar
+    // o pasar.
     public static Jugador hablar(HashMap<String, JugadorInfo> clientes, Mesa mesa) {
         List<Jugador> jugadores = mesa.getJugadores();
         int indicePrimerJugador = 0;
@@ -194,13 +221,13 @@ public class Servidor {
         boolean fin = false;
         boolean hablaronTodos = false;
         boolean enAllIn = false;
-        for(Jugador j: mesa.getJugadoresVivos()){
-            if(j.getFichas()==0){   //Si hay algún jugador en All-In se finaliza la ronda
-                enAllIn=true;
+        for (Jugador j : mesa.getJugadoresVivos()) {
+            if (j.getFichas() == 0) { // Si hay algún jugador en All-In se finaliza la ronda
+                enAllIn = true;
             }
         }
         enviarBool(clientes, enAllIn);
-        if(!enAllIn){
+        if (!enAllIn) {
             // Hablan todos una primera vez
             for (int i = 0; i < jugadores.size(); i++) {
                 try {
@@ -224,7 +251,8 @@ public class Servidor {
             hablaronTodos = true;
             fin = true;
             for (Jugador j : jugadores) {
-                if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() != mesa.getApuesta() && j.getFichas() != 0) {
+                if (mesa.getJugadoresOrden().get(j) <= 10 && j.getApuesta() != mesa.getApuesta()
+                        && j.getFichas() != 0) {
                     fin = false;
                 }
             }
@@ -268,19 +296,16 @@ public class Servidor {
         return null;
     }
 
+    // PRE: s es una instancia válida de JugadorInfo. mesa es una instancia válida
+    // de la clase Mesa. j es una instancia válida de la clase Jugador. ronda es un
+    // entero que indica la ronda actual.
+    // POST: El jugador realiza una acción durante su turno.
     public static void accionJugador(JugadorInfo s, Mesa mesa, Jugador j, int ronda) {
         try {
             ObjectOutputStream out = s.getOutputStream();
             ObjectInputStream in = s.getInputStream();
             enviarInformacionMesa(in, out, mesa);
-            // List<Jugador> jugadoresVivos = mesa.getJugadoresVivos();
             boolean juega = true;
-            // for (Jugador j1 : jugadoresVivos) {
-            // if (j1.getFichas() == 0) {
-            // juega = false; // Si algún jugador está en all-in, el resto no pueden subir
-            // la apuesta.
-            // }
-            // }
             if (juega) {
                 juega = mesa.getJugadoresOrden().get(j) <= 10 && j.getFichas() != 0; // Si es mayor que 10, el jugador
                                                                                      // ya no está en la mano
@@ -351,6 +376,8 @@ public class Servidor {
         }
     }
 
+    // PRE: mesa es una instancia válida de la clase Mesa.
+    // POST: Comprueba si hay un ganador en la mesa.
     public static Jugador comprobar(Mesa mesa) {
         HashMap<Jugador, Integer> jugadoresOrden = mesa.getJugadoresOrden();
         List<Jugador> jugadores = mesa.getJugadores();
@@ -371,6 +398,11 @@ public class Servidor {
         }
     }
 
+    // PRE: clientes contiene información válida de los jugadores conectados. mesa
+    // es una instancia válida de la clase Mesa. ganador es una instancia válida de
+    // la clase Jugador o null.
+    // POST: Finaliza la ronda, distribuyendo fichas y actualizando la información
+    // de los jugadores.
     public static void finalizarRonda(HashMap<String, JugadorInfo> clientes, Mesa mesa, Jugador ganador) {
         List<Jugador> ganadores = new ArrayList<>();
         if (ganador != null) {
@@ -407,6 +439,10 @@ public class Servidor {
         }
     }
 
+    // PRE: in y out son instancias válidas de ObjectInputStream y
+    // ObjectOutputStream respectivamente. mesa es una instancia válida de la clase
+    // Mesa. ganadores es una lista válida de instancias de la clase Jugador.
+    // POST: Envía información sobre los jugadores a través de out.
     public static void enviarInformacionJugadores(ObjectInputStream in, ObjectOutputStream out, Mesa mesa,
             List<Jugador> ganadores) {
         try {
@@ -430,6 +466,10 @@ public class Servidor {
         }
     }
 
+    // PRE: in y out son instancias válidas de ObjectInputStream y
+    // ObjectOutputStream respectivamente. mesa es una instancia válida de la clase
+    // Mesa.
+    // POST: Envía información sobre la mesa a través de out.
     public static void enviarInformacionMesa(ObjectInputStream in, ObjectOutputStream out, Mesa mesa) {
         try {
             out.writeBytes(mesa.informacionMesa());
@@ -439,6 +479,11 @@ public class Servidor {
             e.printStackTrace();
         }
     }
+
+    // PRE: j es una instancia válida de la clase Jugador.
+    // mesa es una instancia válida de la clase Mesa.
+    // cant es un entero que representa la cantidad a subir (en el caso de subir).
+    // POST: Realizan acciones específicas del juego durante el turno de un jugador.
 
     public static void noIr(Jugador j, Mesa mesa) {
         mesa.aumentarOrdenJugador(j, 10);

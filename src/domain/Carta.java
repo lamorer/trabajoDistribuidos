@@ -7,10 +7,11 @@ public class Carta implements Serializable {
     private int numero;
     private Palo palo;
 
+    // PRE: 1<=n<=10
+    // POST: Crea una instancia de tipo carta con los valores indicados, si el
+    // número no es correcto se crea el AS. Inicialmente, establecemos el valor de
+    // AS como 14, pero también puede tener valor 1.
     public Carta(int n, Palo s) {
-        // PRE: 1<=n<=10
-        // POST: Crea una instancia de tipo carta con los valores indicados, si el
-        // número no es correcto se crea el AS. Inicialmente, establecemos el valor de AS como 14, pero también puede tener valor 1. 
         if (n <= 14 && n >= 1) {
             this.numero = n;
         } else {
@@ -18,42 +19,43 @@ public class Carta implements Serializable {
             this.numero = 14;
         }
         this.palo = s;
-
     }
 
+    // PRE: --
+    // POST: Devuelve un entero que es el valor numérico de la Carta.
     public int getNumero() {
-        // PRE: --
-        // POST: It returns an integer that is the numeric value of the Carta.
         return this.numero;
     }
 
+    // PRE: --
+    // POST: Devuelve el palo de la Carta.
     public Palo getPalo() {
-        // PRE: --
-        // POST: It returns the palo of the Carta.
         return this.palo;
     }
 
+    // PRE: 1<=n<=12
+    // POST: Establece n como el número de la Carta.
     public void setNumero(int n) {
-        // PRE: 1<=n<=12
-        // POST: It sets n as the Carta numero.
         this.numero = n;
     }
 
+    // PRE: --
+    // POST: Establece s como el palo de la Carta.
     public void setPalo(Palo s) {
-        // PRE: --
-        // POST: It sets s as the palo of the Carta.
         this.palo = s;
     }
 
+    // PRE: Tenemos una Carta inicializada.
+    // POST: Muestra la información de la Carta.
     public void show() {
-        // PRE: We have an initialized Carta.
-        // POST: 
         System.out.print(this.toString());
     }
 
+    // PRE: --
+    // POST: Devuelve una cadena con la información de la Carta. 11 como J, 12 como
+    // Q, 13 como
+    // K y 14 como AS.
     public String toString() {
-        // PRE: --
-        // POST: It returns a string with the Carta information. 11 as J, 12 as Q, 13 as K and 14 as AS.
         String s = "";
         if (this.numero <= 10 && this.numero != 1) {
             s = s + this.numero;
@@ -79,16 +81,14 @@ public class Carta implements Serializable {
             case Pica:
                 s = s + "P";
                 break;
-
         }
         return s;
-
     }
 
+    // PRE: --
+    // POST: Devuelve TRUE si el objeto dado es una Carta y el número y el palo
+    // son los mismos que los de la Carta inicial.
     public boolean equals(Object anObject) {
-        // PRE: --
-        // POST: It returns TRUE if the given object is a Carta and the numero and palo
-        // are the same as the initial Carta.
         if (this == anObject) {
             return true;
         }
